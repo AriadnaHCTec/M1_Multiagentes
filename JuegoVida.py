@@ -10,17 +10,18 @@ Octubre 8, 2021
 from mesa import Agent, Model 
 
 # Debido a que necesitamos un solo agente por celda elegimos `SingleGrid` que fuerza un solo objeto por celda.
-from mesa.space import SingleGrid
+from mesa.space import MultiGrid
 
 # Con `SimultaneousActivation` hacemos que todos los agentes se activen de manera simultanea.
 from mesa.time import SimultaneousActivation
 import numpy as np
 
+
 class GameLifeAgent(Agent):
     '''
     Representa a un agente o una celda con estado vivo (1) o muerto (0)
     '''
-    def __init__(self, unique_id, model):
+    def __init__(self, unique_id, model, x, y):
         '''
         Crea un agente con estado inicial aleatorio de 0 o 1, también se le asigna un identificador 
         formado por una tupla (x,y). También se define un nuevo estado cuyo valor será definido por las 
@@ -29,6 +30,9 @@ class GameLifeAgent(Agent):
         super().__init__(unique_id, model)
         self.live = np.random.choice([0,1])
         self.next_state = None
+        self.x = x
+        self.y = y
+        
     
     def step(self):
         '''
@@ -36,29 +40,24 @@ class GameLifeAgent(Agent):
         El estado live de la siguiente generación no se cambia aquí se almacena en self.next_state. La idea 
         es esperar a que todos los agentes calculen su estado y una vez hecho eso, ya hacer el cambio.
         '''
-        live_neighbours = 0   
         
         neighbours = self.model.grid.get_neighbors(
             self.pos,
             moore=True,
             include_center=False)
         
-        for neighbor in neighbours:
-            live_neighbours = live_neighbours + neighbor.live
-        
-        self.next_state = self.live
-        if self.next_state == 1:
-            if live_neighbours < 2 or live_neighbours > 3:
-                self.next_state = 0
-        else:
-            if live_neighbours == 3:
-                self.next_state = 1
+        #pos = np.random.choice(neighbours)
+        #print(pos)
     
-    def advance(self):
-        '''
-        Define el nuevo estado calculado del método step.
-        '''
-        self.live = self.next_state
+    #agregie la función
+     def move(self):
+        possible_steps = self.model.grid.get_neighborhood(
+            self.pos,
+            moore=True,
+            include_center=False
+        )
+        new_position = self.random.choice(possible_steps)
+        self.model.grid.move_agent(self, new_position)
             
 class GameLifeModel(Model):
     '''
@@ -66,14 +65,16 @@ class GameLifeModel(Model):
     '''
     def __init__(self, width, height):
         self.num_agents = width * height
-        self.grid = SingleGrid(width, height, True)
+        self.grid = MultiGrid(width, height, True)
         self.schedule = SimultaneousActivation(self)
         self.running = True #Para la visualizacion usando navegador
         
+        i = 0
         for (content, x, y) in self.grid.coord_iter():
-            a = GameLifeAgent((x, y), self)
-            self.grid.place_agent(a, (x, y))
+            a = GameLifeAgent(i, self,x,y)
+            self.grid.place_agent(a, (1, 1))
             self.schedule.add(a)
+            i+=1
         
     
     def step(self):

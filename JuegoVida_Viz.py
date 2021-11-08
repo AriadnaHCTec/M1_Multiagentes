@@ -25,8 +25,8 @@ def agent_portrayal(agent):
 
     return portrayal
 
-ancho = 28
-alto = 28
+ancho = 20
+alto = 20
 grid = CanvasGrid(agent_portrayal, ancho, alto, 750, 750)
 server = ModularServer(GameLifeModel,
                        [grid],
