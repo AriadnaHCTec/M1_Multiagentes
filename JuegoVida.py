@@ -17,22 +17,35 @@ from mesa.time import SimultaneousActivation
 import numpy as np
 
 
-class GameLifeAgent(Agent):
+class Sucio(Agent):
     '''
     Representa a un agente o una celda con estado vivo (1) o muerto (0)
     '''
-    def __init__(self, unique_id, model, x, y):
+    def __init__(self, unique_id, model):
         '''
         Crea un agente con estado inicial aleatorio de 0 o 1, también se le asigna un identificador 
         formado por una tupla (x,y). También se define un nuevo estado cuyo valor será definido por las 
         reglas mencionadas arriba.
         '''
         super().__init__(unique_id, model)
-        self.live = np.random.choice([0,1])
-        self.next_state = None
-        self.x = x
-        self.y = y
-        
+        self.live = 1
+    
+    def kill(self):
+        self.live = 0
+
+
+    
+class Robot(Agent):
+    '''
+    Representa a un agente o una celda con estado vivo (1) o muerto (0)
+    '''
+    def __init__(self, unique_id, model):
+        '''
+        Crea un agente con estado inicial aleatorio de 0 o 1, también se le asigna un identificador 
+        formado por una tupla (x,y). También se define un nuevo estado cuyo valor será definido por las 
+        reglas mencionadas arriba.
+        '''
+        super().__init__(unique_id, model)
     
     def step(self):
         '''
@@ -40,41 +53,39 @@ class GameLifeAgent(Agent):
         El estado live de la siguiente generación no se cambia aquí se almacena en self.next_state. La idea 
         es esperar a que todos los agentes calculen su estado y una vez hecho eso, ya hacer el cambio.
         '''
-        
-        neighbours = self.model.grid.get_neighbors(
-            self.pos,
-            moore=True,
-            include_center=False)
-        
-        #pos = np.random.choice(neighbours)
-        #print(pos)
-    
+        self.move()
+
     #agregie la función
-     def move(self):
+    def move(self):
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
             moore=True,
             include_center=False
         )
         new_position = self.random.choice(possible_steps)
-        self.model.grid.move_agent(self, new_position)
+        self.model.grid.move_agent(self, new_position)  
             
 class GameLifeModel(Model):
     '''
     Define el modelo del juego de la vida.
     '''
-    def __init__(self, width, height):
+    def __init__(self, width, height, N = 5, dirty = .50):
         self.num_agents = width * height
         self.grid = MultiGrid(width, height, True)
         self.schedule = SimultaneousActivation(self)
+        #self.schedule = RandomActivation(self) ? 
         self.running = True #Para la visualizacion usando navegador
-        
-        i = 0
-        for (content, x, y) in self.grid.coord_iter():
-            a = GameLifeAgent(i, self,x,y)
+
+        for (contents, x, y) in self.grid.coord_iter():
+            if self.random.random() < dirty:
+                # Create a tree
+                new_Sucio = Sucio((x, y), self)
+                self.grid._place_agent((x, y), new_Sucio)
+                self.schedule.add(new_Sucio)
+        for i in range (N):
+            a = Robot(i, self)
             self.grid.place_agent(a, (1, 1))
-            self.schedule.add(a)
-            i+=1
+            self.schedule.add(a)        
         
     
     def step(self):

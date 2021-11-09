@@ -14,19 +14,18 @@ def agent_portrayal(agent):
                  "Layer": 0,
                  "Color": "red",
                  "r": 0.5}
+    if type(agent) is Robot:
+        portrayal["scale"] = 0.9
+        portrayal["Layer"] = 1
 
-    if agent.live == 1: #Rojos grandes cuando están vivos
-        portrayal["Color"] = "red"
-        portrayal["Layer"] = 0
-    else:
+    elif type(agent) is Sucio:
         portrayal["Color"] = "grey" #Grises pequeños al morir
         portrayal["Layer"] = 1
         portrayal["r"] = 0.1
-
     return portrayal
 
-ancho = 20
-alto = 20
+ancho = 2
+alto = 2
 grid = CanvasGrid(agent_portrayal, ancho, alto, 750, 750)
 server = ModularServer(GameLifeModel,
                        [grid],
