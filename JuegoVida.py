@@ -53,7 +53,17 @@ class Robot(Agent):
         El estado live de la siguiente generación no se cambia aquí se almacena en self.next_state. La idea 
         es esperar a que todos los agentes calculen su estado y una vez hecho eso, ya hacer el cambio.
         '''
-        self.move()
+        cellmates = self.model.grid.get_cell_list_contents([self.pos])         
+        algoSucio = False
+        for cellmate in cellmates:
+            if type(cellmate) is Sucio:
+                print(cellmate)
+                print("pos")
+                print(cellmate.pos)
+                self.model.grid._remove_agent(self.pos, cellmate) 
+                algoSucio = True
+        if not algoSucio:
+            self.move()
 
     #agregie la función
     def move(self):

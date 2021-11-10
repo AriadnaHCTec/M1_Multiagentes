@@ -19,13 +19,15 @@ def agent_portrayal(agent):
         portrayal["Layer"] = 1
 
     elif type(agent) is Sucio:
-        portrayal["Color"] = "grey" #Grises pequeños al morir
+        portrayal["Color"] = "grey"
         portrayal["Layer"] = 1
         portrayal["r"] = 0.1
     return portrayal
 
-ancho = 2
-alto = 2
+ancho = 20
+alto = 20
+N = 5
+dirty = .50
 grid = CanvasGrid(agent_portrayal, ancho, alto, 750, 750)
 server = ModularServer(GameLifeModel,
                        [grid],
