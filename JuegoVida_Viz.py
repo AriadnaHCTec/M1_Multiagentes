@@ -28,6 +28,17 @@ ancho = 20
 alto = 20
 N = 5
 dirty = .50
+
+"""
+#Codigo como de jupyter notebook para obtener información recolectada
+#no funcionó unu
+model = GameLifeModel(ancho, alto)
+for i in range(10):
+    model.step()
+all_grid = model.datacollector.get_model_vars_dataframe()
+#all_grid.plot()
+"""
+
 grid = CanvasGrid(agent_portrayal, ancho, alto, 750, 750)
 server = ModularServer(GameLifeModel,
                        [grid],

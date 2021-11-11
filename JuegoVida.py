@@ -16,6 +16,8 @@ from mesa.space import MultiGrid
 from mesa.time import SimultaneousActivation
 import numpy as np
 
+from mesa.datacollection import DataCollector
+import pandas as pd
 
 class Sucio(Agent):
     '''
@@ -65,7 +67,7 @@ class Robot(Agent):
         if not algoSucio:
             self.move()
 
-    #agregie la función
+    #agrege la función
     def move(self):
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
@@ -74,7 +76,16 @@ class Robot(Agent):
         )
         new_position = self.random.choice(possible_steps)
         self.model.grid.move_agent(self, new_position)  
-            
+
+
+def obtain_info(model):
+    """Sirve para obtener información y regresarla para guardarla."""
+    grid = np.zeros((model.grid.width, model.grid.height))
+    for cell in model.grid.coord_iter():
+        cell_content, x, y = cell
+        grid[x][y] = cell_content.live
+    return grid
+
 class GameLifeModel(Model):
     '''
     Define el modelo del juego de la vida.
@@ -85,6 +96,9 @@ class GameLifeModel(Model):
         self.schedule = SimultaneousActivation(self)
         #self.schedule = RandomActivation(self) ? 
         self.running = True #Para la visualizacion usando navegador
+        
+        #Guardar info
+        #self.datacollector = DataCollector({"info": obtain_info})
 
         for (contents, x, y) in self.grid.coord_iter():
             if self.random.random() < dirty:
@@ -99,4 +113,8 @@ class GameLifeModel(Model):
         
     
     def step(self):
+        #Guardar info
+        # self.datacollector.collect(self)
         self.schedule.step()
+
+
