@@ -47,6 +47,7 @@ class Robot(Agent):
         formado por una tupla (x,y). También se define un nuevo estado cuyo valor será definido por las 
         reglas mencionadas arriba.
         '''
+        #self.model = model
         super().__init__(unique_id, model)
     
     def step(self):
@@ -71,6 +72,7 @@ class Robot(Agent):
             print(self.model.listaSucios) #imprime la lista para ver que funciona(se puede comentar)$$$
         if not algoSucio:
             self.move()
+            self.model.numMovAg += 1
 
     #agrege la función
     def move(self):
@@ -95,16 +97,17 @@ class GameLifeModel(Model):
     '''
     Define el modelo del juego de la vida.
     '''
-    def __init__(self, width, height, N = 5, dirty = .50):
+    def __init__(self, width, height, N, dirty, NI):
         self.num_agents = width * height
         self.grid = MultiGrid(width, height, True)
         self.schedule = SimultaneousActivation(self)
         #self.schedule = RandomActivation(self) ? 
         self.running = True #Para la visualizacion usando navegador
-        
-        
+        self.finalStep = NI
         self.listaSucios = []#lista para graficar cunatos sucios habia en cada step$$$
-        self.numberOfIterations = 100#numero de veces que se va a correr el programa (steps) $$$
+        self.InumberOfIterations = NI
+        self.numMovAg = 0
+        self.numberOfIterations = NI#numero de veces que se va a correr el programa (steps) $$$
         self.num_dirty = 0#numero e sucios en el ambiente$$$
         #Guardar info
         #self.datacollector = DataCollector({"info": obtain_info})
@@ -127,10 +130,17 @@ class GameLifeModel(Model):
         #Guardar info
         # self.datacollector.collect(self)
         self.numberOfIterations -= 1#se resta para que llegue a cero$$$
-        if self.numberOfIterations > 0:#si no es cero sigue corriendo$$$
+        if self.numberOfIterations > 0 and self.num_dirty > 0:#si no es cero sigue corriendo$$$
             self.schedule.step()
         else:#llego a cero, se para el programa$$$
-            self.stop()#no se como parar el modelo desde la clase $$$
-            print(self.num_dirty/self.num_agents)#porcentaje de casillas sucias en el ambiente $$$
+            #self.stop()#no se como parar el modelo desde la clase $$$
+            if self.numberOfIterations > 0:
+                self.finalStep = self.InumberOfIterations - self.numberOfIterations
+                self.numberOfIterations = 0
+            print(self.finalStep)
+            print(((self.num_agents - self.num_dirty)/self.num_agents) * 100)#porcentaje de casillas sucias en el ambiente $$$
+            print(self.numMovAg)
+
+
 
 

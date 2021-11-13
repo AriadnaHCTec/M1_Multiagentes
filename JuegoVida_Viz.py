@@ -43,6 +43,6 @@ grid = CanvasGrid(agent_portrayal, ancho, alto, 750, 750)
 server = ModularServer(GameLifeModel,
                        [grid],
                        "Trafic Model",
-                       {"width":ancho, "height":alto})
+                       {"width":ancho, "height":alto, "N":5, "dirty":.5, "NI":300})
 server.port = 8521 # The default
 server.launch()
